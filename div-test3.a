@@ -100,7 +100,8 @@ main:           push lr
                 mov fp, sp
             
                 ; ld r3, maxNum
-                mov r3, 0
+                ld r3, thousand
+                ; mov r3, 100
                 mov r4, 10
 
                 lea r0, ogNumIs
@@ -136,6 +137,7 @@ main:           push lr
                 pop lr
                 ret
 
+thousand         .word 1000
 maxNum          .word 65535
 ogNumIs         .string "The original number is: "
 divNumIs        .string "The division result is: "
