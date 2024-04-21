@@ -106,34 +106,37 @@ divTimes:       push lr
                 ldr r0, fp, 2 ; load initial dividend
                 str r0, fp, -2 ; store dividend, now accessible at fp-2
                 ldr r0, fp, 3 ; load initial divisor
+
     @L0dt:      ldr r1, fp, -1 ; load power
                 cmp r1, 0
                 bre @L1dt
                 ldr r1, fp, -2 ; load dividend
 
-                push r0 ; push OLD QUOTIENT (new divisor)
+                ;;;; reload initial divisor
+                ldr r0, fp, 3 ; load initial divisor
+                push r0 ; push initial divisor
                 push r1
 
-                ; debugging
-                lea r0, dividing
-                sout r0
-                udout r1
-                lea r0, by
-                sout r0
-                ldr r0, fp, 3 ; initial divisor
-                udout r0
-                nl
-                ; debugging
+                ; ; debugging
+                ; lea r0, dividing
+                ; sout r0
+                ; udout r1
+                ; lea r0, by
+                ; sout r0
+                ; ldr r0, fp, 3 ; initial divisor
+                ; udout r0
+                ; nl
+                ; ; debugging
 
                 bl div
                 add sp, sp, 2
 
-                ; debugging
-                lea r1, divNumIs
-                sout r1
-                udout r0
-                nl
-                ; debugging
+                ; ; debugging
+                ; lea r1, divNumIs
+                ; sout r1
+                ; udout r0
+                ; nl
+                ; ; debugging
 
                 ; update quotient
                 str r0, fp, -2 ; store new quotient at fp-2
@@ -141,7 +144,7 @@ divTimes:       push lr
                 ldr r0, fp, -1 ; load power
                 sub r0, r0, 1 ; dec power
                 str r0, fp, -1 ; store power
-                
+
                 ldr r0, fp, -2 ; load OLD QUOTIENT (new divisor) into r0
                 br @L0dt
 
@@ -194,7 +197,7 @@ main:           push lr
                 ;; test 1 end
 
                 ;; test 2 start
-                ld r3, bigNum ; next: maxNum
+                ld r3, maxNum ; next: bigNum ; next: maxNum
                 mov r4, 10
                 mov r2, 2
 
@@ -241,6 +244,7 @@ main:           push lr
 
 maxNum          .word 65535
 bigNum          .word 10000
+medNum          .word 500
 ogNumIs         .string "The original number is: "
 divNumIs        .string "The division result is: "
 modNumIs        .string "The modulo result is: "
