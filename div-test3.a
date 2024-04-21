@@ -36,7 +36,8 @@ div:            push lr
                 str r0, fp, -1 ; store the new quotient
                 br @L0div
 
-    @L1div:     mov sp, fp
+    @L1div:     ldr r0, fp, -1 ; load quotient
+                mov sp, fp
                 pop fp
                 pop lr
                 ret
