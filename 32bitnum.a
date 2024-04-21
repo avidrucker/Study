@@ -22,11 +22,103 @@
 startup:        bl main
                 halt
 
+
+; arg1 is x ; x is the dividend 
+; arg2 is y ; y is the divisor
+; return (r0) is quotient (result)
+div:            push lr
+                push fp
+                mov fp, sp
+                mov r0, 0
+                push r0 ; (fp-1 is the quotient)
+                ldr r0, fp, 2 ; (fp+2 is the dividend)
+                cmp r0, 0
+                brgt @L0div ; if the dividend is positive
+                bre @L1div ; if the dividend is 0
+                mov r0, 1 ; bool isUnsigned. we have an unsigned large number. true for bigger
+                push r0 ; (fp-2 is the bool isUnsigned)
+    @L0div:     ldr r0, fp, 2 ; load dividend
+                ldr r1, fp, 3 ; load divisor, (fp+3 is the divisor)
+                sub r0, r0, r1 ; subtract the divisor from the dividend
+                str r0, fp, 2 ; store the new dividend
+                ldr r0, fp, -2 ; load bool isUnsigned
+                cmp r0, 1    ; if original number is large enough to be negative
+                bre @isLargeDiv
+                ldr r0, fp, 2 ; load dividend
+                cmp r0, 0
+                brn @L1div
+    @isLargeDiv:   ldr r0, fp, 2 ; load dividend
+                cmp r0, 0           ; check if current number is now positive. if so set r3 to 0
+                brlt @stepoverDiv
+                ldr r0, fp, -2 ; load bool isUnsigned
+                mov r0, 0           ; toggle isUnsigned off
+                str r0, fp, -2 ; store the new bool isUnsigned
+    @stepoverDiv:  ldr r0, fp, -1 ; load quotient
+                add r0, r0, 1 ; increment quotient
+                str r0, fp, -1 ; store the new quotient
+                br @L0div
+
+    @L1div:     ldr r0, fp, -1 ; load quotient
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+
+;; DONE: replace mod function w/ one's digit "OD" function that
+;        returns the one's digit (including 0 when dividend is 0)
+; arg1 is x ; x is the dividend 
+; arg2 is y ; y is the divisor
+; return (r0) is quotient (result)
+onesDigit:      push lr
+                push fp
+                mov fp, sp
+                mov r0, 0
+                push r0 ; (fp-1 is the quotient)
+                ldr r0, fp, 2 ; (fp+2 is the dividend)
+                cmp r0, 0
+                brgt @L0od ; if the dividend is positive
+                bre @L1done ; if the dividend is 0
+                mov r0, 1 ; bool isUnsigned. we have an unsigned large number. true for bigger
+                push r0 ; (fp-2 is the bool isUnsigned)
+    @L0od:      ldr r0, fp, 2 ; load dividend
+                ldr r1, fp, 3 ; load divisor, (fp+3 is the divisor)
+                sub r0, r0, r1 ; subtract the divisor from the dividend
+                str r0, fp, 2 ; store the new dividend
+                ldr r0, fp, -2 ; load bool isUnsigned
+                cmp r0, 1    ; if original number is large enough to be negative
+                bre @isLargeOd
+                ldr r0, fp, 2 ; load dividend
+                cmp r0, 0
+                brn @L1od
+    @isLargeOd: ldr r0, fp, 2 ; load dividend
+                cmp r0, 0           ; check if current number is now positive. if so set r3 to 0
+                brlt @stepoverOd
+                ldr r0, fp, -2 ; load bool isUnsigned
+                mov r0, 0           ; toggle isUnsigned off
+                str r0, fp, -2 ; store the new bool isUnsigned
+    @stepoverOd: ldr r0, fp, -1 ; load quotient
+                add r0, r0, 1 ; increment quotient
+                str r0, fp, -1 ; store the new quotient
+                br @L0od
+
+    @L1od:      ldr r0, fp, 2 ; load dividend
+                ldr r1, fp, 3 ; load divisor
+                add r0, r0, r1 ; add the divisor to the dividend
+    @L1done:    mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+
 main:           push lr
                 push fp
                 mov fp, sp
 
-                ;; ld r0, num32test1 ; load the number of digits
+                sub sp, sp, 1 ; allocate space for the carry out register (fp-1)
+                sub sp, sp, 1 ; allocate space for isLastLoop register (fp-2)
+                sub sp, sp, 1 ; allocate space for the 1's place of the first half (fp-3)
+                sub sp, sp, 1 ; allocate space for the 1's place of the second half (fp-4)
 
                 ; step A: get the one's place by dividing by 10^0, then modding by 10
                 mov r3, 1 ; var base divisor
@@ -36,69 +128,122 @@ main:           push lr
                 sout r0
                 nl
 @L0:            
-                ld r1, num32test1 + 1 ; load the first half ; TODO: fix syntax highlighting for optional spaces between label, +/- operator, and offset
-                ld r2, num32test1 + 2 ; load the second half
-                div r1, r3 ; divide the first half by the base divisor
-                rem r1, r4 ; get the 1's place
-                div r2, r3 ; divide the second half by the base divisor
-                rem r2, r4 ; get the 1's place
+                ld r0, num32test1 + 1 ; load the first half ; TODO: fix syntax highlighting for optional spaces between label, +/- operator, and offset
+                
+                ; divide the first half by the base divisor r0/r3
+                push r3 ; push the base divisor to the stack
+                push r0 ; push the first half to the stack
+                bl div
+                add sp, sp, 2
+                ; div result is now in r0, r1 is polluted by div function
+                
+                ; get one's digit of the first half by r0 od r4
+                push r4
+                push r0
+                bl onesDigit
+                add sp, sp, 2
+                ; OD result is now in r0, r1 is polluted by mod function
+                ; save the first half's 1's place to the stack (fp-3)
+                str r0, fp, -3
+                
+                ld r0, num32test1 + 2 ; load the second half
 
-                udout r1
+                ; divide the second half by the base divisor r0/r3
+                push r3 ; push the base divisor to the stack
+                push r0 ; push the first half to the stack
+                bl div
+                add sp, sp, 2
+                ; we have div result in r0, r1 is polluted by div function
+
+                ; get one's digit of second half by onesDigit func r0 od r4
+                push r4
+                push r0
+                bl onesDigit
+                add sp, sp, 2
+                ; we have the 1's place r2%r4 in r0, r1 is polluted by OD function
+                ; save the second half's 1's place to the stack (fp-4)
+                str r0, fp, -4
+
+                ; print out both 1's places
+                lea r0, firstHalfOne
+                sout r0
+                ldr r0, fp, -3
+                udout r0
                 nl
-                udout r2
+                lea r0, secondHalfOne
+                sout r0
+                ldr r0, fp, -4
+                udout r0
                 nl
 
-                mov r0, r1
-                or r0, r2 ; if r0 is 0, then we are on the last loop
+                ldr r0, fp, -3 ; load both digits
+                ldr r1, fp, -4
+                ;; TODO: check that this next line's logic is not brittle
+                ;        eg. what happens if we try to add 1002 to 1004?
+                or r0, r1 ; if r0 is 0, then we are on the last loop
                 brnz @L6
 
-                mov r0, 1
-                st r0, lastLoop
+                mov r2, 1
+                str r2, fp, -2 ; set the last loop register to 1 to indicate we are on the last loop
 
-@L6             add r1, r1, r2 ; add the 2 digits from each half
+@L6:            ldr r0, fp, -3 ; load both digits
+                ldr r1, fp, -4
+                add r0, r0, r1 ; add the 2 digits from each half
                 ; load and add the carry as well
-                ld r2, carry
-                add r1, r1, r2
+                ldr r1, fp, -1 ; load the carry out register
+                add r0, r0, r1
                 ; compare against 10
-                cmp r1, r4
+                cmp r0, r4
                 brlt @L1 ; if less than 10, we push to the stack and reset carry out to 0
                 bre @L2 ; ... else, we will need to get the 1's place, save it to the stack
                 brgt @L2 ; ... and then save a 1 to a carry out register
 @L1:            
-                lea r0, debug1
-                sout r0
-                dout r1
+                lea r1, debug1
+                sout r1
+                dout r0
                 nl
 
-                push r1 ; push the digit to the stack
+                ; if we are on the last loop AND carry out is 0, we are done
+                ; else, we push the remaining 1 digit to the stack
+                ; and then we are actually done
+                ldr r1, fp, -2 ; load the last loop register
+                sub r1, r1, 1 ; subtract 1 from last loop register
+                or r1, r0 ; if r1 is 0, we are on the last loop
+                cmp r1, 0
+                bre @L7 ; if we are on the last loop, we are done
+
+                push r0 ; push the digit to the stack
                 ; reset carry out to zero
-                mov r1, 0
-                st r1, carry
+@L7:            mov r0, 0
+                str r0, fp, -1 ; reset the carry out register to zero
 
                 br @L3
 
 ; get the 1's place, save to stack, and set carry out to 1
-@L2:
-                rem r1, r4 ; get the 1's place
+@L2:            ; get the 1's place r0 od r4
+                push r4
+                push r0
+                bl onesDigit
+                add sp, sp, 2
+                ; the 1's place is now in r0, r1 is polluted by OD function
 
-                lea r0, debug1
-                sout r0
-                dout r1
+                lea r1, debug1
+                sout r1
+                dout r0
                 nl
 
-                push r1 ; push the digit to the stack
-                mov r1, 1 ; set the carry out register to 1
-                st r1, carry
+                push r0 ; push the digit to the stack
+                mov r0, 1
+                str r0, fp, -1 ; reset the carry out register to zero
 
-                ld r1, carry
-                lea r0, debug2
-                sout r0
-                dout r1
+                lea r1, debug2
+                sout r1
+                dout r0
                 nl
 @L3:
                 mul r3, r4 ; this is the offset to go from 1 to 10 to 100...
 
-                ld r0, lastLoop
+                ldr r0, fp, -2 ; load the last loop register
                 cmp r0, 1
                 bre @L5 ; if we are on the last loop, we are done
 
@@ -123,18 +268,19 @@ main:           push lr
 ; the number itself is divided in 2 (filling up first to the max), 
 ; and saved across two words
 
+; passed tests so far: 199+9, 123+4, 123+345
+
 num32test1:     .word 4 ; first word holds the # of placecs
-                .word 999 ; test1
-                .word 9 ; test1
+                .word 12345 ; test1 ; next test: 1002
+                .word 2 ; test1 ; next test: 1003
 
 num32test2:     .word 6 ; first word holds the # of placecs
                 .word 65535
                 .word 2
 
-carry:          .word 0 ; carry out register, 0 or 1
-lastLoop:       .word 0 ; last loop register, set to 1 when last loop is reached
-
 debug1:         .string "Pushing to the stack: "
 debug2:         .string "Carry out is: "
 loopStartMsg:   .string "Beginning of the loop"
 endOfLoopMsg:   .string "Loop has ended"
+firstHalfOne:   .string "1st half one's digit: "
+secondHalfOne:  .string "2nd half one's digit: "

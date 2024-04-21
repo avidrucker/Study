@@ -1,0 +1,80 @@
+startup:        bl main
+                halt
+
+
+; arg1 is x ; x is the dividend 
+; arg2 is y ; y is the divisor
+; return (r0) is remainder (result)
+onesDigit:      push lr
+                push fp
+                mov fp, sp
+                mov r0, 0
+                push r0 ; (fp-1 is the quotient)
+                ldr r0, fp, 2 ; (fp+2 is the dividend)
+                cmp r0, 0
+                brgt @L0od ; if the dividend is positive
+                bre @L1done ; if the dividend is 0
+                mov r0, 1 ; bool isUnsigned. we have an unsigned large number. true for bigger
+                push r0 ; (fp-2 is the bool isUnsigned)
+    @L0od:      ldr r0, fp, 2 ; load dividend
+                ldr r1, fp, 3 ; load divisor, (fp+3 is the divisor)
+                sub r0, r0, r1 ; subtract the divisor from the dividend
+                str r0, fp, 2 ; store the new dividend
+                ldr r0, fp, -2 ; load bool isUnsigned
+                cmp r0, 1    ; if original number is large enough to be negative
+                bre @isLargeOd
+                ldr r0, fp, 2 ; load dividend
+                cmp r0, 0
+                brn @L1od
+    @isLargeOd: ldr r0, fp, 2 ; load dividend
+                cmp r0, 0           ; check if current number is now positive. if so set r3 to 0
+                brlt @stepoverOd
+                ldr r0, fp, -2 ; load bool isUnsigned
+                mov r0, 0           ; toggle isUnsigned off
+                str r0, fp, -2 ; store the new bool isUnsigned
+    @stepoverOd: ldr r0, fp, -1 ; load quotient
+                add r0, r0, 1 ; increment quotient
+                str r0, fp, -1 ; store the new quotient
+                br @L0od
+
+    @L1od:      ldr r0, fp, 2 ; load dividend
+                ldr r1, fp, 3 ; load divisor
+                add r0, r0, r1 ; add the divisor to the dividend
+    @L1done:    mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+main:           push lr
+                push fp
+                mov fp, sp
+            
+                ld r3, maxNum
+                ; mov r3, 5
+                mov r4, 10
+
+                lea r0, ogNumIs
+                sout r0
+                udout r3
+                nl
+
+                lea r0, odNumIs
+                sout r0
+
+                push r4 ; push 10
+                mov r1, r3
+                push r1
+                bl onesDigit
+                add sp, sp, 2
+                udout r0
+                nl
+
+                mov r0, 0
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+maxNum          .word 65535
+ogNumIs         .string "The original number is: "
+odNumIs         .string "The one's digit is: "
