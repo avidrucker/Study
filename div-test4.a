@@ -106,7 +106,7 @@ divTimes:       push lr
                 ldr r0, fp, 2 ; load initial dividend
                 str r0, fp, -2 ; store dividend, now accessible at fp-2
                 ldr r0, fp, 3 ; load initial divisor
-@L0dt           ldr r1, fp, -1 ; load power
+    @L0dt:      ldr r1, fp, -1 ; load power
                 cmp r1, 0
                 bre @L1dt
                 ldr r1, fp, -2 ; load dividend
@@ -141,7 +141,7 @@ divTimes:       push lr
                 ldr r0, fp, -2 ; load OLD QUOTIENT (new divisor) into r0
                 br @L0dt
 
-@L1dt           ldr r0, fp, -2 ; load quotient  
+    @L1dt:      ldr r0, fp, -2 ; load quotient  
                 mov sp, fp
                 pop fp
                 pop lr
@@ -174,10 +174,10 @@ main:           push lr
                 sout r0
                 nl
 
-                push r2 ; push 2
-                push r4 ; push 4
+                push r2 ; push 2 (times to divide)
+                push r4 ; push 4 (number to divide with)
                 mov r1, r3
-                push r1 ; push 16
+                push r1 ; push 16 (number to divide by)
                 bl divTimes
                 add sp, sp, 3
 
