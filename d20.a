@@ -1,3 +1,4 @@
+; STATUS: incomplete
 ; LCC Assembly program that enables the user to roll a 
 ; chosen number of dice of a chosen number of sides
 ; the program starts w/ an initial random seed input

@@ -1,3 +1,6 @@
+; STATUS: not started yet, WAS blocked by missing division and modulus 
+;         functions that work for numbers above 32767.
+
 ; #include <stdio.h>
 ; #include <string.h>
 

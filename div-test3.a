@@ -1,3 +1,11 @@
+; STATUS: working
+; LCC Assembly program that enables division of numbers up to 65535.
+; The rationale for this program to exist is that LCC Assembly does 
+; not support out-of-the-box division of numbers greater than 32767, 
+; give or take the dividend. This program is a workaround for that 
+; limitation. Built with the support of Michael, thank you Michael!
+; TODO: add mod function
+
 startup:        bl main
                 halt
 

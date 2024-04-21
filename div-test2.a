@@ -1,6 +1,8 @@
+; STATUS: working
 ; originally referenced from ex1102.a
 ; this program assumes that the dividend is a positive unsigned integer
 ; and the divisor is a positive signed integer
+; I teamed up with Michael M to get this working. Thank you Michael!
 
 startup:        bl main
                 halt

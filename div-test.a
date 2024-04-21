@@ -1,3 +1,5 @@
+; this is a test to see rem and div work for large
+; unsigned numbers. spoiler alert: they do not work
         ld r0, tenThou
         udout r0
         nl
