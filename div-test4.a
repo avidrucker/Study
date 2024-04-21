@@ -1,0 +1,203 @@
+; STATUS: working
+; LCC Assembly program that enables division of numbers up to 65535.
+; The rationale for this program to exist is that LCC Assembly does 
+; not support out-of-the-box division of numbers greater than 32767, 
+; give or take the dividend. This program is a workaround for that 
+; limitation. Built with the support of Michael, thank you Michael!
+; TODO: add function div-times, which will divide a number x by y^z
+
+startup:        bl main
+                halt
+
+; arg1 is x ; x is the dividend 
+; arg2 is y ; y is the divisor
+; return (r0) is quotient (result)
+div:            push lr
+                push fp
+                mov fp, sp
+                mov r0, 0
+                push r0 ; (fp-1 is the quotient)
+                ldr r0, fp, 2 ; (fp+2 is the dividend)
+                cmp r0, 0
+                brgt @L0div ; if the dividend is positive
+                bre @L1div ; if the dividend is 0
+                mov r0, 1 ; bool isUnsigned. we have an unsigned large number. true for bigger
+                push r0 ; (fp-2 is the bool isUnsigned)
+    @L0div:     ldr r0, fp, 2 ; load dividend
+                ldr r1, fp, 3 ; load divisor, (fp+3 is the divisor)
+                sub r0, r0, r1 ; subtract the divisor from the dividend
+                str r0, fp, 2 ; store the new dividend
+                ldr r0, fp, -2 ; load bool isUnsigned
+                cmp r0, 1    ; if original number is large enough to be negative
+                bre @isLargeDiv
+                ldr r0, fp, 2 ; load dividend
+                cmp r0, 0
+                brn @L1div
+    @isLargeDiv:   ldr r0, fp, 2 ; load dividend
+                cmp r0, 0           ; check if current number is now positive. if so set r3 to 0
+                brlt @stepoverDiv
+                ldr r0, fp, -2 ; load bool isUnsigned
+                mov r0, 0           ; toggle isUnsigned off
+                str r0, fp, -2 ; store the new bool isUnsigned
+    @stepoverDiv:  ldr r0, fp, -1 ; load quotient
+                add r0, r0, 1 ; increment quotient
+                str r0, fp, -1 ; store the new quotient
+                br @L0div
+
+    @L1div:     ldr r0, fp, -1 ; load quotient
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+
+; arg1 is x ; x is the dividend 
+; arg2 is y ; y is the divisor
+; return (r0) is remainder (result)
+mod:            push lr
+                push fp
+                mov fp, sp
+                mov r0, 0
+                push r0 ; (fp-1 is the quotient)
+                ldr r0, fp, 2 ; (fp+2 is the dividend)
+                cmp r0, 0
+                brgt @L0mod ; if the dividend is positive
+                bre @L1mod ; if the dividend is 0
+                mov r0, 1 ; bool isUnsigned. we have an unsigned large number. true for bigger
+                push r0 ; (fp-2 is the bool isUnsigned)
+    @L0mod:     ldr r0, fp, 2 ; load dividend
+                ldr r1, fp, 3 ; load divisor, (fp+3 is the divisor)
+                sub r0, r0, r1 ; subtract the divisor from the dividend
+                str r0, fp, 2 ; store the new dividend
+                ldr r0, fp, -2 ; load bool isUnsigned
+                cmp r0, 1    ; if original number is large enough to be negative
+                bre @isLargeMod
+                ldr r0, fp, 2 ; load dividend
+                cmp r0, 0
+                brn @L1mod
+    @isLargeMod: ldr r0, fp, 2 ; load dividend
+                cmp r0, 0           ; check if current number is now positive. if so set r3 to 0
+                brlt @stepoverMod
+                ldr r0, fp, -2 ; load bool isUnsigned
+                mov r0, 0           ; toggle isUnsigned off
+                str r0, fp, -2 ; store the new bool isUnsigned
+    @stepoverMod: ldr r0, fp, -1 ; load quotient
+                add r0, r0, 1 ; increment quotient
+                str r0, fp, -1 ; store the new quotient
+                br @L0mod
+
+    @L1mod:     ldr r0, fp, 2 ; load dividend
+                ldr r1, fp, 3 ; load divisor
+                add r0, r0, r1 ; add the divisor to the dividend
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+;
+
+divTimes:       push lr
+                push fp
+                mov fp, sp
+
+                ldr r0, fp, 4 ; load power
+                sub sp, sp, 2 ; make room for the power & running quotient
+                str r0, fp, -1 ; store power, now accessible at fp-1
+                ldr r0, fp, 2 ; load initial dividend
+                str r0, fp, -2 ; store dividend, now accessible at fp-2
+                ldr r0, fp, 3 ; load initial divisor
+@L0dt           ldr r1, fp, -1 ; load power
+                cmp r1, 0
+                bre @L1dt
+                ldr r1, fp, -2 ; load dividend
+
+                push r0 ; push OLD QUOTIENT (new divisor)
+                push r1
+
+                ; lea r0, dividing
+                ; sout r0
+                ; udout r1
+                ; lea r0, by
+                ; sout r0
+                ; ldr r0, fp, 3 ; initial divisor
+                ; udout r0
+                ; nl
+
+                bl div
+                add sp, sp, 2
+
+                ; lea r1, divNumIs
+                ; sout r1
+                ; udout r0
+                ; nl
+
+                ; update quotient
+                str r0, fp, -2 ; store new quotient at fp-2
+
+                ldr r0, fp, -1 ; load power
+                sub r0, r0, 1 ; dec power
+                str r0, fp, -1 ; store power
+                
+                ldr r0, fp, -2 ; load OLD QUOTIENT (new divisor) into r0
+                br @L0dt
+
+@L1dt           ldr r0, fp, -2 ; load quotient  
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+main:           push lr
+                push fp
+                mov fp, sp
+            
+                ; ld r3, maxNum
+                mov r3, 16
+                mov r4, 4
+                mov r2, 2
+
+                lea r0, ogNumIs
+                sout r0
+                udout r3
+                nl
+
+                lea r0, dividing
+                sout r0
+                udout r3 ; 16
+                lea r0, by
+                sout r0
+                udout r4 ; 4
+                lea r0, comma
+                sout r0
+                udout r2 ; 2
+                lea r0, times
+                sout r0
+                nl
+
+                push r2 ; push 2
+                push r4 ; push 4
+                mov r1, r3
+                push r1 ; push 16
+                bl divTimes
+                add sp, sp, 3
+
+                lea r1, divTimesIs
+                sout r1
+                udout r0
+                nl
+
+                mov r0, 0
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+maxNum          .word 65535
+ogNumIs         .string "The original number is: "
+divNumIs        .string "The division result is: "
+modNumIs        .string "The modulo result is: "
+divTimesIs      .string "The divide N times result is: "
+dividing        .string "Dividing "
+by              .string " by "
+comma           .string ", "
+times           .string " times..."
