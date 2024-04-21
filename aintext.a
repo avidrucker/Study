@@ -1,0 +1,14 @@
+            lea r0, prompt 
+            sout r0
+            ain r0
+            lea r1, msg
+            sout r1
+            mov r2, '\''
+            aout r2
+            aout r0
+            aout r2
+            nl
+            halt
+
+prompt:     .string "Enter a character, then press enter: "
+msg:        .string "You entered: "

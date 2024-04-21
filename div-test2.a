@@ -1,0 +1,48 @@
+; originally referenced from ex1102.a
+; this program assumes that the dividend is a positive unsigned integer
+; and the divisor is a positive signed integer
+
+startup:        bl main
+                halt
+
+div:            ; r1 is x ; x is the dividend 
+                ; r2 is y ; y is the divisor
+                ; r0 is quotient (result)
+                mov r0, 0
+                cmp r1, 0
+                brgt @L0 ; if the dividend is positive
+                bre @L1 ; if the dividend is 0
+                mov r3, 1 ; bool isUnsigned. we have an unsigned large number. true for bigger
+@L0:            sub r1, r1, r2 ; subtract the divisor from the dividend
+                cmp r3, 1    ; if original number is large enough to be negative
+                bre @isLarge
+                cmp r1, 0
+                brn @L1
+@isLarge:       cmp r1, 0           ; check if current number is now positive. if so set r3 to 0
+                brlt @stepover
+                mov r3, 0           ; toggle isUnsigned off
+@stepover:      add r0, r0, 1
+                br @L0
+
+@L1:            ret
+
+main:           push lr
+                push fp
+                mov fp, sp
+            
+
+                ld r1, maxNum
+                ; mov r1, 31
+                mov r2, 10
+                bl div
+                udout r0
+                nl
+
+                mov r0, 0
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+maxNum  .word 65535
+nextNum .word 32777 ; Q: Why is this the max num I seem to be able to divide by?

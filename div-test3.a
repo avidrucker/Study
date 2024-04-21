@@ -1,0 +1,64 @@
+startup:        bl main
+                halt
+
+; r1 is x ; x is the dividend 
+; r2 is y ; y is the divisor
+; r0 is quotient (result)
+div:            push lr
+                push fp
+                mov fp, sp
+                mov r0, 0
+                push r0 ; (fp-1 is the quotient)
+                ldr r0, fp, 2 ; (fp+2 is the dividend)
+                cmp r0, 0
+                brgt @L0div ; if the dividend is positive
+                bre @L1div ; if the dividend is 0
+                mov r0, 1 ; bool isUnsigned. we have an unsigned large number. true for bigger
+                push r0 ; (fp-2 is the bool isUnsigned)
+    @L0div:     ldr r0, fp, 2 ; load dividend
+                ldr r1, fp, 3 ; load divisor, (fp+3 is the divisor)
+                sub r0, r0, r1 ; subtract the divisor from the dividend
+                str r0, fp, 2 ; store the new dividend
+                ldr r0, fp, -2 ; load bool isUnsigned
+                cmp r0, 1    ; if original number is large enough to be negative
+                bre @isLarge
+                ldr r0, fp, 2 ; load dividend
+                cmp r0, 0
+                brn @L1div
+    @isLarge:   ldr r0, fp, 2 ; load dividend
+                cmp r0, 0           ; check if current number is now positive. if so set r3 to 0
+                brlt @stepover
+                ldr r0, fp, -2 ; load bool isUnsigned
+                mov r0, 0           ; toggle isUnsigned off
+                str r0, fp, -2 ; store the new bool isUnsigned
+    @stepover:  ldr r0, fp, -1 ; load quotient
+                add r0, r0, 1 ; increment quotient
+                str r0, fp, -1 ; store the new quotient
+                br @L0div
+
+    @L1div:     mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+;
+
+main:           push lr
+                push fp
+                mov fp, sp
+            
+                mov r2, 10
+                push r2
+                ld r1, maxNum
+                push r1
+                bl div
+                udout r0
+                nl
+
+                mov r0, 0
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+maxNum  .word 65535

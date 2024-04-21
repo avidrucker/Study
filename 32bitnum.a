@@ -1,0 +1,140 @@
+; Let's say that we want to, in LCC Assembly, read, write, add, and subtract 
+; 32 bit numbers. The benefits to this could include things such as 
+; representation of 32 floating point, as well as larger numbers. This could
+; also scale up to 64 bit numbers, and so on.
+
+; 0. how to store/represent a 32 bit number w/ 16 bit registers
+; 0. how to print out 32 bit numbers
+; 1. how to read in 32 bit numbers: as a string w/ sin, convert string to number
+; 2. how to detect overflow in unsigned addition: brc branch on carry
+; 3. how to save the overflow amount to create a three word (1 word to store the 
+;    digit count, and 2 words to store the digits themselves) result that 
+;    represents a 32 bit number
+; 4. how to add two 32 bit numbers
+; 5. how to subtract two 32 bit numbers
+
+
+; PROGRAM 1: print a 32 digit number
+; step 1: loop to add first and second, putting each digit result 
+; onto the stack and saving the carry
+; step 2: pop the stack and print the result
+; step 3: repeat until all digits are printed
+startup:        bl main
+                halt
+
+main:           push lr
+                push fp
+                mov fp, sp
+
+                ;; ld r0, num32test1 ; load the number of digits
+
+                ; step A: get the one's place by dividing by 10^0, then modding by 10
+                mov r3, 1 ; var base divisor
+                mov r4, 10 ; const mod operand
+@L4:
+                lea r0, loopStartMsg
+                sout r0
+                nl
+@L0:            
+                ld r1, num32test1 + 1 ; load the first half ; TODO: fix syntax highlighting for optional spaces between label, +/- operator, and offset
+                ld r2, num32test1 + 2 ; load the second half
+                div r1, r3 ; divide the first half by the base divisor
+                rem r1, r4 ; get the 1's place
+                div r2, r3 ; divide the second half by the base divisor
+                rem r2, r4 ; get the 1's place
+
+                udout r1
+                nl
+                udout r2
+                nl
+
+                mov r0, r1
+                or r0, r2 ; if r0 is 0, then we are on the last loop
+                brnz @L6
+
+                mov r0, 1
+                st r0, lastLoop
+
+@L6             add r1, r1, r2 ; add the 2 digits from each half
+                ; load and add the carry as well
+                ld r2, carry
+                add r1, r1, r2
+                ; compare against 10
+                cmp r1, r4
+                brlt @L1 ; if less than 10, we push to the stack and reset carry out to 0
+                bre @L2 ; ... else, we will need to get the 1's place, save it to the stack
+                brgt @L2 ; ... and then save a 1 to a carry out register
+@L1:            
+                lea r0, debug1
+                sout r0
+                dout r1
+                nl
+
+                push r1 ; push the digit to the stack
+                ; reset carry out to zero
+                mov r1, 0
+                st r1, carry
+
+                br @L3
+
+; get the 1's place, save to stack, and set carry out to 1
+@L2:
+                rem r1, r4 ; get the 1's place
+
+                lea r0, debug1
+                sout r0
+                dout r1
+                nl
+
+                push r1 ; push the digit to the stack
+                mov r1, 1 ; set the carry out register to 1
+                st r1, carry
+
+                ld r1, carry
+                lea r0, debug2
+                sout r0
+                dout r1
+                nl
+@L3:
+                mul r3, r4 ; this is the offset to go from 1 to 10 to 100...
+
+                ld r0, lastLoop
+                cmp r0, 1
+                bre @L5 ; if we are on the last loop, we are done
+
+                br @L4
+@L5:            ; end of the loop
+
+                lea r0, endOfLoopMsg
+                sout r0
+                nl
+
+                s
+
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+; we save num 32 as three words, the first being the pointer to the
+; num32 'struct' itself. the 1st word is the number of digits in 
+; the number. The 2nd and 3rd words represent the number itself.
+; the max number an unsigned 32 bit number can be is 4,294,967,295
+; the number itself is divided in 2 (filling up first to the max), 
+; and saved across two words
+
+num32test1:     .word 4 ; first word holds the # of placecs
+                .word 999 ; test1
+                .word 9 ; test1
+
+num32test2:     .word 6 ; first word holds the # of placecs
+                .word 65535
+                .word 2
+
+carry:          .word 0 ; carry out register, 0 or 1
+lastLoop:       .word 0 ; last loop register, set to 1 when last loop is reached
+
+debug1:         .string "Pushing to the stack: "
+debug2:         .string "Carry out is: "
+loopStartMsg:   .string "Beginning of the loop"
+endOfLoopMsg:   .string "Loop has ended"

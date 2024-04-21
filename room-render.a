@@ -1,0 +1,150 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; naive room render code written in LCC assembly
+; by: @avidrucker
+; date: 2024-04-16
+; description: Renders an M*N room with walls
+; based on user input for M rows and N cols.
+; Further improvements could include:
+; - input validation to make sure player inputs only valid numbers (1-20)
+; - save board state to memory using a 2D array
+; - add a player character to the room
+; - add a way to move the player character around the room (WASD or HJKL, etc.)
+; - add a way to clear the screen and re-render the room (e.g. 'nextFrame' func.)
+; - add a way to manually exit the program (e.g. Enter Q to quit)
+; - add a monster for the player to fight against (bat, snake, zombie, etc.)
+; - add a way to fight the monster (e.g. 'attack' func.)
+; - add a win condition (e.g. player defeats monster)
+; - add a lose condition (e.g. player is defeated by monster)
+; - add a health system where the player and monster have health points
+; - add basic collision to prevent the player from walking through walls
+; - add basic collision to prevent the player from walking 'over' enemies
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+startup:        bl main
+                halt
+
+rows:           .word 0
+cols:           .word 0
+wall:           .word '='
+; Q: why don't '-' nor '\-' directly save & print as expected?
+; using ascii code workaround for now to save '-' char in memory
+empty:          .word 45
+
+; example 8x18 room should look like this:
+;  "===================="
+;  "=------------------="
+;  "=------------------="
+;  "=------------------="
+;  "=------------------="
+;  "=------------------="
+;  "=------------------="
+;  "=------------------="
+;  "=------------------="
+;  "===================="
+
+; print r0 # of chars, the char itself is in r1
+printChars:     push lr
+                push fp
+                mov fp, sp
+                
+                mov r2, 0 ; our counter
+@L0:            cmp r2, r0
+                bre @L1
+                aout r1
+                add r2, r2, 1 ; increment counter
+                br @L0
+
+@L1:            mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+printRows:      push lr
+                push fp
+                mov fp, sp
+
+                ld r2, rows
+                mov r3, 0 ; our counter
+@L2:            ld r2, rows
+                cmp r3, r2
+                bre @L3
+                ; print single row
+                ld r1, wall
+                aout r1
+
+                ld r0, cols
+                ld r1, empty
+                bl printChars
+
+                ld r1, wall
+                aout r1
+                nl
+                add r3, r3, 1 ; increment counter
+                br @L2
+@L3:
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+renderRoom:     push lr
+                push fp
+                mov fp, sp
+
+                ; print top wall
+                ld r0, cols
+                add r0, r0, 2
+                ld r1, wall
+                bl printChars
+                nl
+                ; for each row:
+                ; print left side wall, empty spaces, right side wall
+                bl printRows
+
+                ; print bottom wall
+                ld r0, cols
+                add r0, r0, 2
+                ld r1, wall
+                bl printChars
+                nl
+
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+getRoomDimensions:
+                push lr
+                push fp
+                mov fp, sp
+
+                lea r0, inputRows
+                sout r0
+                din r0
+                st r0, rows
+
+                lea r0, inputCols
+                sout r0
+                din r0
+                st r0, cols
+
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+inputRows:      .string "Enter the number of rows: "
+inputCols:      .string "Enter the number of columns: "
+
+main:           push lr
+                push fp
+                mov fp, sp
+
+                bl getRoomDimensions
+
+                bl renderRoom
+
+                mov sp, fp
+                pop fp
+                pop lr
+                ret

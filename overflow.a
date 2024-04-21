@@ -1,0 +1,13 @@
+        ld r0, num
+        udout r0
+        nl
+        add r0, r0, 1
+        udout
+        nl
+        st r0, num
+        ld r0, num
+        udout
+        nl
+        halt
+
+num     .word 65535

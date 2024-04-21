@@ -1,0 +1,13 @@
+        ld r0, tenThou
+        udout r0
+        nl
+        mov r1, 10
+        rem r0, r1
+        udout r0
+        nl
+        halt
+
+maxNum  .word 65535
+hundred .word 100
+nineThou .word 9000
+tenThou  .word 40000

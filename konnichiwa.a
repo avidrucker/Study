@@ -1,0 +1,6 @@
+            lea r0, msg
+            sout r0
+            nl
+            halt
+
+msg:        .string "こんにちは、世界！"

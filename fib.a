@@ -1,0 +1,47 @@
+    .start main
+
+prompt: .string "Enter the Fibonacci sequence number: "
+resultmsg: .string "Fibonacci number is: "
+
+main:
+    lea r0, prompt    ; Load the address of the prompt message
+    sout r0          ; Output the prompt message
+    din r1           ; Input the n value into r1
+
+    ; Check if the input is 0 - special case
+    cmp r1, 0
+    bre zeroCase
+    ; Check if the input is 1 - special case
+    cmp r1, 1
+    bre oneCase
+
+    mov r2, 0         ; Previous Fibonacci number, Fib(n-2)
+    mov r3, 1         ; Current Fibonacci number, Fib(n-1)
+    mov r4, 1         ; Counter for loop, starts from 2 because Fib(2)
+
+loop:
+    cmp r4, r1        ; Compare counter with the input number
+    brgt endLoop      ; If counter > input, exit loop
+
+    add r5, r2, r3    ; r5 = r2 + r3, calculate next Fibonacci number
+    mov r2, r3        ; Move current to previous
+    mov r3, r5        ; Update current with new Fib number
+    add r4, r4, 1     ; Increment counter
+    br loop           ; Repeat loop
+
+zeroCase:
+    mov r3, 0         ; Special case, Fib(0) = 0
+    br printResult
+
+oneCase:
+    mov r3, 1         ; Special case, Fib(1) = 1
+    br printResult
+
+endLoop:
+    ; r3 contains the nth Fibonacci number at this point
+
+printResult:
+    lea r0, resultmsg ; Load the address of the result message
+    sout r0          ; Output the result message
+    dout r3          ; Output the nth Fibonacci number
+    halt             ; Halt the program

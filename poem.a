@@ -1,0 +1,22 @@
+                lea r0, prompt
+                sout r0
+                sin r0
+                lea r0, line1
+                sout r0
+                sin r0
+                lea r0, line2
+                sout r0
+                sin r0
+                lea r0, line3
+                sout r0
+                sin r0
+                lea r0, line4
+                sout r0
+                sin r0
+                halt
+
+prompt:         .string "Tap enter to continue..."
+line1:          .string "Roses are red"
+line2:          .string "Violets are blue"
+line3:          .string "Assembly is super nerdy"
+line4:          .string "And so are you :)"
