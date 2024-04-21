@@ -114,22 +114,26 @@ divTimes:       push lr
                 push r0 ; push OLD QUOTIENT (new divisor)
                 push r1
 
-                ; lea r0, dividing
-                ; sout r0
-                ; udout r1
-                ; lea r0, by
-                ; sout r0
-                ; ldr r0, fp, 3 ; initial divisor
-                ; udout r0
-                ; nl
+                ; debugging
+                lea r0, dividing
+                sout r0
+                udout r1
+                lea r0, by
+                sout r0
+                ldr r0, fp, 3 ; initial divisor
+                udout r0
+                nl
+                ; debugging
 
                 bl div
                 add sp, sp, 2
 
-                ; lea r1, divNumIs
-                ; sout r1
-                ; udout r0
-                ; nl
+                ; debugging
+                lea r1, divNumIs
+                sout r1
+                udout r0
+                nl
+                ; debugging
 
                 ; update quotient
                 str r0, fp, -2 ; store new quotient at fp-2
@@ -147,13 +151,51 @@ divTimes:       push lr
                 pop lr
                 ret
 
+;
+
 main:           push lr
                 push fp
                 mov fp, sp
             
-                ; ld r3, maxNum
-                mov r3, 16
-                mov r4, 4
+                ;; test 1 start
+                ; mov r3, 16
+                ; mov r4, 4
+                ; mov r2, 2
+
+                ; lea r0, ogNumIs
+                ; sout r0
+                ; udout r3
+                ; nl
+
+                ; lea r0, dividing
+                ; sout r0
+                ; udout r3 ; 16
+                ; lea r0, by
+                ; sout r0
+                ; udout r4 ; 4
+                ; lea r0, comma
+                ; sout r0
+                ; udout r2 ; 2
+                ; lea r0, times
+                ; sout r0
+                ; nl
+
+                ; push r2 ; push 2 (times to divide)
+                ; push r4 ; push 4 (number to divide with)
+                ; mov r1, r3
+                ; push r1 ; push 16 (number to divide by)
+                ; bl divTimes
+                ; add sp, sp, 3
+
+                ; lea r1, divTimesIs
+                ; sout r1
+                ; udout r0
+                ; nl
+                ;; test 1 end
+
+                ;; test 2 start
+                ld r3, bigNum ; next: maxNum
+                mov r4, 10
                 mov r2, 2
 
                 lea r0, ogNumIs
@@ -174,6 +216,7 @@ main:           push lr
                 sout r0
                 nl
 
+                ; test 1
                 push r2 ; push 2 (times to divide)
                 push r4 ; push 4 (number to divide with)
                 mov r1, r3
@@ -186,13 +229,18 @@ main:           push lr
                 udout r0
                 nl
 
+                ;; test 2 end
+
                 mov r0, 0
                 mov sp, fp
                 pop fp
                 pop lr
                 ret
 
+;
+
 maxNum          .word 65535
+bigNum          .word 10000
 ogNumIs         .string "The original number is: "
 divNumIs        .string "The division result is: "
 modNumIs        .string "The modulo result is: "
