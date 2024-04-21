@@ -4,7 +4,7 @@
 ; not support out-of-the-box division of numbers greater than 32767, 
 ; give or take the dividend. This program is a workaround for that 
 ; limitation. Built with the support of Michael, thank you Michael!
-; TODO: add function div-times, which will divide a number x by y^z
+; DONE: add function div-times, which will divide a number x by y^z
 
 startup:        bl main
                 halt
