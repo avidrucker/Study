@@ -2,6 +2,12 @@
 ; LCC Assembly program that enables the user to roll a 
 ; chosen number of dice of a chosen number of sides
 ; the program starts w/ an initial random seed input
+; DONE: prompt user for random seed
+; DONE: increment seed pointer to get next random number
+; DONE: make sure w/ rem (mod) that seed never goes out of bounds
+; TODO: functionize the random number generator seeding (takes a number, returns nothing)
+; TODO: functionize the random number generator (takes nothing, returns a number in r0)
+; TODO: functionize the dice rolling (takes number of dice, number of sides, returns total)
 
 startup:        bl main
                 halt
@@ -14,18 +20,42 @@ main:           push lr
                 lea r0, prompt1
                 sout r0
                 din r0
-                lea r1, nums
+                mov r1, 100
+                rem r0, r1
+@L0:            lea r1, nums
                 add r1, r1, r0
                 ldr r1, r1, 0
-
-                mov sp, fp
+                lea r2, message1
+                sout r2
+                dout r1
+                nl
+                lea r2, againQ
+                sout r2
+                din r1
+                cmp r1, 1
+                brne @L1
+                add r0, r0, 1
+                mov r1, 100
+                rem r0, r1
+                br @L0
+@L1:            mov sp, fp
                 pop fp
                 pop lr
                 ret
 
-prompt1:        .string "Enter a random seed # from 0 to 99: "
-prompt2:        .string "Enter the number of die sides: " 
-prompt3:        .string "Enter the number of dice to roll: "
+prompt1:        .string "Enter a random seed # from 1 to 100: "
+prompt2:        .string "Enter the number of dice to roll: "
+prompt3:        .string "Enter the number of die sides: " 
+message1:       .string "The next # is: "
+youRolledA:     .string "You rolled a "
+againQ:         .string "Roll another? (1=yes, 0=no): "
+
+testNums:       .word 1
+                .word 2
+                .word 3
+                .word 4
+                .word 5
+                .word 6
 
 nums:           .word 96
                 .word 16
