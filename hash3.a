@@ -50,6 +50,7 @@ mod:            push lr
 
 ;
 
+; a simple and small range hash function
 hash:           push lr
                 push fp
                 mov fp, sp
