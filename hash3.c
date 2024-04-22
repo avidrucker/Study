@@ -12,7 +12,7 @@ unsigned short simple_hash(const char *str) {
 
         printf("during calculation, hash * 31 + c = %u\n", hash * 31 + c);
         // Calculate hash value using a small prime multiplier and modulus to keep the value low
-        hash = (hash * 31 + c) % 100000; // 2113;  // Using 2113 as it's the largest prime below 65536/31
+        hash = (hash * 31 + c) % 2113; // 2113;  // Using 2113 as it's the largest prime below 65536/31
     }
 
     return hash;
