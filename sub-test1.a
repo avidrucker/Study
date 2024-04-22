@@ -1,0 +1,8 @@
+        ld r0, maxNum
+        udout r0
+        nl
+        sub r0, r0, 5
+        udout r0
+        nl
+        halt
+maxNum  .word 65535
