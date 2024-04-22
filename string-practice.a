@@ -1,0 +1,202 @@
+; status: working
+; write LCC program that implements the following functions:
+; DONE: read in a string, save into a char buffer
+; DONE: print out a string from the buffer
+; DONE: get length of a string
+; DONE: clear the buffer
+; DONE: write reverseString that takes buffer input and buffer output
+; TODO: write isEmpty func for a given buffer, returns 1 if empty, 0 if not
+
+startup:        bl main
+                halt
+
+; takes an target buffer address with which to save input, prompts the user 
+; to input a string, puts string into target buffer, and returns nothing
+getString:      push lr 
+                push fp
+                mov fp, sp 
+
+                lea r0, prompt ; load prompt address
+                sout r0 ; print out prompt
+
+                ldr r0, fp, 2 ; load buffer address from arg
+                sin r0
+
+                mov r0, 0
+                mov sp, fp 
+                pop fp 
+                pop lr 
+                ret
+
+; takes in via the stack a string address
+; returns back the string length via r0
+stringLength:   push lr
+                push fp
+                mov fp, sp 
+
+                mov r1, 0 ; counter
+                ldr r0, fp, 2 ; TODO: practice loading first param/arg in a func
+@L0:            ldr r2, r0, 0 ; get the current char
+                cmp r2, 0 ; see if the current char is null (0)
+                bre @L1 ; if the current char is null, we have reached the end 
+                ; of the string and can stop looping
+
+                add r0, r0, 1 ; increment string pointer address
+                add r1, r1, 1 ; increment counter
+                br @L0
+@L1:
+                mov r0, r1 ; return string length via r0
+
+                mov sp, fp 
+                pop fp
+                pop lr
+                ret
+
+; takes in a buffer address as a parameter
+; clears the buffer and returns 1 to r0 if successful
+clearBuffer:    push lr
+                push fp
+                mov fp, sp
+                
+                ldr r0, fp, 2 ; load address of buffer
+@L2:            ldr r2, r0, 0 ; get the current char
+                cmp r2, 0 ; see if the current char is null (0)
+                bre @L3 ; if the current char is null, we have reached the end 
+                ; of the string and can stop looping
+
+                mov r3, 0
+                str r3, r0, 0 ; overwrite current char w/ 0
+                add r0, r0, 1 ; increment string pointer address
+                br @L2
+@L3:
+                mov r0, 1 ; return 1 via r0
+                
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+; takes in two params: an input address to load from, and an 
+; output target address to save to. returns nothing.
+reverseString:  push lr 
+                push fp
+                mov fp, sp 
+
+                ; load input string from buffer address arg
+                ldr r0, fp, 2
+                mov r1, 0
+                push r1 ; this 0 will tell us that we have reached the end 
+                ; of the string when we are popping it off the stack
+
+                ; put the string chars onto the stack to reverse
+@L4:            ldr r2, r0, 0 ; get the current char
+                cmp r2, 0 ; see if the current char is null (0)
+                bre @L5 ; if the current char is null, we have reached the end 
+                ; of the string and can stop looping
+
+                push r2 ; save current char onto the stack
+                add r0, r0, 1 ; increment string pointer address
+                br @L4
+@L5:
+                ; now we can loop to pop the chars off the stack
+                ; load target buffer address arg
+                ldr r1, fp, 3
+@L6:            pop r0
+                cmp r0, 0
+                bre @L7
+
+                ; current char in r0 is not a zero
+                str r0, r1, 0 ; store current char into target buffer
+                add r1, r1, 1 ; increment target buffer pointer
+                br @L6
+
+@L7:                            
+                ; now that we have added the entire string to the buffer
+                ; we must lastly add a null terminating character (0) to it
+                mov r0, 0
+                str r1, r0, 0          
+
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+main:           push lr
+                push fp
+                mov fp, sp
+                
+                lea r0, buffer ; load buffer address
+                push r0
+                bl getString
+                add sp, sp, 1
+
+                lea r2, message1
+                sout r2
+                lea r0, buffer
+                sout r0 ; print out inputted string
+                nl
+
+                push r0
+                bl stringLength ; returns string length into r0
+                add sp, sp, 1
+                lea r2, message2
+                sout r2
+                dout r0 ; print out string length
+                nl
+
+                ; reverse the string in buffer, save into reverseBuff
+                lea r0, reverseBuff
+                push r0
+                lea r0, buffer
+                push r0
+                bl reverseString
+                add sp, sp, 2
+
+                ; print out reversed string
+                lea r1, message4
+                sout r1
+                lea r0, reverseBuff
+                sout r0
+                nl
+
+                ; tell the user we are clearing the buffer
+                lea r2, message3
+                sout r2
+                nl
+
+                lea r0, buffer
+                push r0
+                bl clearBuffer
+                add sp, sp, 1
+
+                ; confirm that buffer has been cleared by printing the buffer
+                lea r2, message1
+                sout r2
+                lea r0, buffer
+                sout r0
+                nl
+
+                ; confirm that the buffer has been cleared by getting the string length
+                lea r0, buffer
+                push r0
+                bl stringLength ; returns string length into r0
+                add sp, sp, 1
+                lea r2, message2
+                sout r2
+                dout r0 ; print out string length
+                nl
+
+                mov r0, 0 ; return 0
+
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+prompt:         .string "Enter a string: "
+message1:       .string "The string buffer is: "
+message2:       .string "The string length is: "
+message3:       .string "Clearing the buffer..."
+message4:       .string "The reversed string is: "
+buffer:         .zero 100
+reverseBuff:    .zero 100
