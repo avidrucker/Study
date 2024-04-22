@@ -1,9 +1,11 @@
+; STATUS: incomplete
 ; Let's say that we want to, in LCC Assembly, read, write, add, and subtract 
 ; 32 bit numbers. The benefits to this could include things such as 
 ; representation of 32 floating point, as well as larger numbers. This could
 ; also scale up to 64 bit numbers, and so on.
 
-; PROGRAM 1b: print a 32 digit number
+; PROGRAM 1: add two large unsigned numbers & print 
+;            resulting 32 digit number
 ; This version of the program uses a different mechanism
 ; to detect when it is on the last loop.
 ; The method is uses is to count up the number of 0 results
