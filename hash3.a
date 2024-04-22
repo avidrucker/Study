@@ -1,8 +1,162 @@
-; STATUS: not started yet, WAS blocked by missing division and modulus 
-;         functions that work for numbers above 32767.
+; STATUS: working
+; This program's development was initially blocked by missing 
+; division and modulus functions that work for numbers above 32767.
 
-; #include <stdio.h>
-; #include <string.h>
+startup:        bl main
+                halt
+
+; arg1 is x ; x is the dividend 
+; arg2 is y ; y is the divisor
+; return (r0) is remainder (result)
+mod:            push lr
+                push fp
+                mov fp, sp
+                mov r0, 0
+                push r0 ; (fp-1 is the quotient)
+                ldr r0, fp, 2 ; (fp+2 is the dividend)
+                cmp r0, 0
+                brgt @L0mod ; if the dividend is positive
+                bre @L1mod ; if the dividend is 0
+                mov r0, 1 ; bool isUnsigned. we have an unsigned large number. true for bigger
+                push r0 ; (fp-2 is the bool isUnsigned)
+    @L0mod:     ldr r0, fp, 2 ; load dividend
+                ldr r1, fp, 3 ; load divisor, (fp+3 is the divisor)
+                sub r0, r0, r1 ; subtract the divisor from the dividend
+                str r0, fp, 2 ; store the new dividend
+                ldr r0, fp, -2 ; load bool isUnsigned
+                cmp r0, 1    ; if original number is large enough to be negative
+                bre @isLargeMod
+                ldr r0, fp, 2 ; load dividend
+                cmp r0, 0
+                brn @L1mod
+    @isLargeMod: ldr r0, fp, 2 ; load dividend
+                cmp r0, 0           ; check if current number is now positive. if so set r3 to 0
+                brlt @stepoverMod
+                ldr r0, fp, -2 ; load bool isUnsigned
+                mov r0, 0           ; toggle isUnsigned off
+                str r0, fp, -2 ; store the new bool isUnsigned
+    @stepoverMod: ldr r0, fp, -1 ; load quotient
+                add r0, r0, 1 ; increment quotient
+                str r0, fp, -1 ; store the new quotient
+                br @L0mod
+
+    @L1mod:     ldr r0, fp, 2 ; load dividend
+                ldr r1, fp, 3 ; load divisor
+                add r0, r0, r1 ; add the divisor to the dividend
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+;
+
+hash:           push lr
+                push fp
+                mov fp, sp
+
+                mov r0, 7 ; hash seed
+                push r0 ; hash seed is now at (fp-1)
+                sub sp, sp, 1 ; allocate space for current char c at (fp-2)
+
+    @L0hash:
+                ldr r0, fp, 2 ; load str pointer
+                ldr r0, r0, 0 ; get current char
+                cmp r0, 0 ; check if current char is null terminator
+                bre @L1hash
+                ; inner while loop
+                ldr r0, fp, 2 ; load str pointer
+                ldr r0, r0, 0 ; get current char
+                str r0, fp, -2 ; store current char into c
+                ldr r0, fp, 2 ; load str pointer again
+                add r0, r0, 1 ; move pointer to next char
+                str r0, fp, 2 ; store new pointer
+
+                ; load hash seed
+                ldr r0, fp, -1
+                mov r1, 31 ; 1. multiply
+                mul r0, r1
+                ldr r1, fp, -2 ; get current char c
+                add r0, r0, r1 ; 2. add
+                lea r1, debugMsg
+                sout r1
+                udout r0
+                nl
+                ; 3. modulus
+                ld r1, largePrime
+                push r1
+                push r0
+                bl mod
+                add sp, sp, 2
+                ; store new hash seed
+                str r0, fp, -1
+
+                br @L0hash
+                ; end of while loop
+    @L1hash:
+                ldr r0, fp, -1 ; load hash seed return value into r0
+
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+; 
+
+
+; takes an target buffer address with which to save input, prompts the user 
+; to input a string, puts string into target buffer, and returns nothing
+getString:      push lr 
+                push fp
+                mov fp, sp 
+
+                lea r0, prompt ; load prompt address
+                sout r0 ; print out prompt
+
+                ldr r0, fp, 2 ; load buffer address from arg
+                sin r0
+
+                mov r0, 0
+                mov sp, fp 
+                pop fp 
+                pop lr 
+                ret
+
+; 
+
+main:           push lr
+                push fp
+                mov fp, sp
+
+                lea r0, text
+                push r0
+                bl getString
+                add sp, sp, 1
+
+                lea r0, text
+                push r0
+                bl hash
+                add sp, sp, 1
+
+                lea r1, theHashOf
+                sout r1
+                lea r1, text
+                sout r1
+                lea r1, is
+                sout r1
+                dout r0
+                nl
+
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+debugMsg:       .string "during calculation, hash * 31 + c = "
+prompt:         .string "Enter a string: "
+theHashOf:      .string "The hash of \""
+is:             .string "\" is "
+largePrime:     .word 2113
+text:           .zero 101
 
 ; // A simple and small range hash function
 ; unsigned short simple_hash(const char *str) {
