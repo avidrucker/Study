@@ -1,4 +1,7 @@
 ; STATUS: incomplete
+; Note: This program may, for large numbers, pause its execution and warn of
+; a possible infinite loop. This can be bypassed by typing z and hitting enter.
+
 ; Let's say that we want to, in LCC Assembly, read, write, add, and subtract 
 ; 32 bit numbers. The benefits to this could include things such as 
 ; representation of 32 floating point, as well as larger numbers. This could
@@ -6,6 +9,7 @@
 
 ; PROGRAM 1: add two large unsigned numbers & print 
 ;            resulting 32 digit number
+;
 ; This version of the program uses a different mechanism
 ; to detect when it is on the last loop.
 ; The method is uses is to count up the number of 0 results
@@ -364,8 +368,8 @@ main:           push lr
 ; passed tests so far: 199+9, 123+4, 123+345
 
 num32test1:     .word 4 ; first word holds the # of placecs
-                .word 20000 ; test1 ; next test: 1002
-                .word 15000 ; test1 ; next test: 1003
+                .word 1002 ; test1 ; next test: 1002 ; next test: 20000
+                .word 1003 ; test1 ; next test: 1003 ; next test: 20000
 
 num32test2:     .word 6 ; first word holds the # of placecs
                 .word 65535
