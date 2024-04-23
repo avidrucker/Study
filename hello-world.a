@@ -1,0 +1,11 @@
+; the startup function calls the main function to start
+; and then halts program execution.
+startup:        bl main
+                halt
+
+main:           lea r0, helloWorld
+                sout r0
+                nl
+                ret
+
+helloWorld:     .string "Hello, World!"
