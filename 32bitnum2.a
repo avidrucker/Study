@@ -346,14 +346,33 @@ main:           push lr
 
                 br @mainLoop
 @L5:            ; end of the loop
-
+                sub r3, r3, 1 ; decrement r3 by 1 to get the number of digits
                 lea r0, endOfLoopMsg
                 sout r0
                 nl
 
-                s
+                ; s
+                lea r0, theResultOf
+                sout r0
+                ld r0, num32test1 + 1
+                udout r0
+                lea r0, plus
+                sout r0
+                ld r0, num32test1 + 2
+                udout r0
+                lea r0, is
+                sout r0
+                ; udout r3
+                ; nl
 
-                mov sp, fp
+                ; pop and print the stack
+@L10:            cmp r3, 0
+                bre @L11
+                pop r0
+                dout r0
+                sub r3, r3, 1
+                br @L10
+@L11:            mov sp, fp
                 pop fp
                 pop lr
                 ret
@@ -368,8 +387,8 @@ main:           push lr
 ; passed tests so far: 199+9, 123+4, 123+345
 
 num32test1:     .word 4 ; first word holds the # of placecs
-                .word 1002 ; test1 ; next test: 1002 ; next test: 20000
-                .word 1003 ; test1 ; next test: 1003 ; next test: 20000
+                .word 65535 ; test1 ; next test: 1002 ; next test: 20000
+                .word 65535 ; test1 ; next test: 1003 ; next test: 20000
 
 num32test2:     .word 6 ; first word holds the # of placecs
                 .word 65535
@@ -381,3 +400,6 @@ loopStartMsg:   .string "Beginning of the loop"
 endOfLoopMsg:   .string "Loop has ended"
 firstHalfOne:   .string "1st half one's digit: "
 secondHalfOne:  .string "2nd half one's digit: "
+theResultOf     .string "The result of "
+plus            .string " plus "
+is              .string " is "
