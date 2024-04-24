@@ -1,0 +1,60 @@
+; Some math functions in LCC Assembly that make sense for non-fractional (integer) precision
+; - absolute value
+; - square root
+; - power
+; - factorial
+; - greatest common divisor
+; - least common multiple
+; - prime number check
+; - prime number generation
+; - max
+; - min
+; - average
+; - median
+; - mode
+; - range
+; In LCC Assembly we already get the following functions for free:
+; - addition
+; - subtraction
+; - multiplication (for signed numbers only w/ 16 bits of precision)
+; - division (for signed numbers only w/ 16 bits of precision)
+; - modulo (for signed numbers only w/ 16 bits of precision)
+; - bitwise AND
+; - bitwise OR
+; - bitwise XOR
+; - bitwise NOT
+startup:        bl main
+                halt
+
+; Takes in a number (via r0), if number is negative
+; func returns back positive value of same magnitude.
+; Else, returns original number. Note: Func polutes r1
+abs:            cmp r0, 0
+                bre @absDone
+                brp @absDone
+                mov r1, -1
+                mul r0, r1
+    @absDone:   ret
+
+main:           push lr
+                push fp
+                mov fp, sp 
+
+                ; abs func test start
+                mov r0, -5
+                lea r1, theAbsValOf
+                sout r1
+                dout r0
+                lea r1, is
+                sout r1
+                bl abs
+                dout r0
+                ; abs func text over
+
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+theAbsValOf:    .string "The absolute value of "
+is:             .string " is: "
