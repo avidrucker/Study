@@ -191,9 +191,9 @@ main:           push lr
                 mov r3, 0 ; var base divisor
                 mov r4, 10 ; const mod operand
 @mainLoop:
-                lea r0, loopStartMsg
-                sout r0
-                nl
+                ; lea r0, loopStartMsg
+                ; sout r0
+                ; nl
 @L0:            
                 ld r0, num32test1 + 1 ; load the first half ; TODO: fix syntax highlighting for optional spaces between label, +/- operator, and offset
                 
@@ -224,7 +224,7 @@ main:           push lr
                 
                 ld r0, num32test1 + 2 ; load the second half
 
-                ; TODO: get the number of digits in the number, save it
+                ; DONE: get the number of digits in the number, save it
                 ; r3 is a counter for number of times we divide by 10. With this 
                 ; counter we can calc and/or save the # of digits in the number
                 ; udout r3
@@ -258,16 +258,16 @@ main:           push lr
                 str r0, fp, -4
 
                 ; print out both 1's places
-                lea r0, firstHalfOne
-                sout r0
-                ldr r0, fp, -3
-                udout r0
-                nl
-                lea r0, secondHalfOne
-                sout r0
-                ldr r0, fp, -4
-                udout r0
-                nl
+                ; lea r0, firstHalfOne
+                ; sout r0
+                ; ldr r0, fp, -3
+                ; udout r0
+                ; nl
+                ; lea r0, secondHalfOne
+                ; sout r0
+                ; ldr r0, fp, -4
+                ; udout r0
+                ; nl
 
                 ;; TODO: check that this next line's logic is not brittle
                 ;        eg. what happens if we try to add 1002 to 1004?
@@ -292,10 +292,10 @@ main:           push lr
                 bre @L2 ; ... else, we will need to get the 1's place, save it to the stack
                 brgt @L2 ; ... and then save a 1 to a carry out register
 @L1:            
-                lea r1, debug1
-                sout r1
-                dout r0
-                nl
+                ; lea r1, debug1
+                ; sout r1
+                ; dout r0
+                ; nl
 
                 ; if we are on the last loop (last loop = 2) AND carry out is 0, we are done
                 ; else, we push the remaining 1 digit to the stack
@@ -323,20 +323,20 @@ main:           push lr
                 add sp, sp, 2
                 ; the 1's place is now in r0, r1 is polluted by OD function
 
-                lea r1, debug1
-                sout r1
-                dout r0
-                nl
+                ; lea r1, debug1
+                ; sout r1
+                ; dout r0
+                ; nl
 
                 push r0 ; push the digit to the stack
                 ; TODO: q: do we need to reset the carry out here?
                 mov r0, 0
                 str r0, fp, -1 ; reset the carry out register to zero
 
-                lea r1, debug2
-                sout r1
-                dout r0
-                nl
+                ; lea r1, debug2
+                ; sout r1
+                ; dout r0
+                ; nl
 @L3:
                 add r3, r3, 1 ; this makes the powers of 1 to 10 to 100...
 
@@ -387,8 +387,8 @@ main:           push lr
 ; passed tests so far: 199+9, 123+4, 123+345
 
 num32test1:     .word 4 ; first word holds the # of placecs
-                .word 65535 ; test1 ; next test: 1002 ; next test: 20000
-                .word 65535 ; test1 ; next test: 1003 ; next test: 20000
+                .word 4400 ; test1 ; next test: 1002 ; next test: 20000
+                .word 34000 ; test1 ; next test: 1003 ; next test: 20000
 
 num32test2:     .word 6 ; first word holds the # of placecs
                 .word 65535
