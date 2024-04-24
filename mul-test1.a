@@ -1,0 +1,6 @@
+    mov r0, 5
+    mul r0, cheese ; TODO: capture errors for 2nd operand to mul
+    dout r0
+    halt
+
+cheese: .word 3
