@@ -1,0 +1,31 @@
+startup:        bl main 
+                halt
+
+main:           push lr
+                push fp
+                mov fp, sp
+
+                mov r0, 7
+                mov r1, 6
+                rem r0, r1
+
+                lea r1, theModOf
+                sout r1
+                mov r1, 7
+                dout r1
+                lea r1, modOperator
+                sout r1
+                mov r1, 6
+                dout r1
+                lea r1, is
+                sout r1
+                dout r0
+
+                mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+theModOf:       .string "The mod of "
+modOperator:    .string " % "
+is:             .string " is "
