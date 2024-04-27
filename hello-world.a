@@ -3,9 +3,9 @@
 startup:        bl main
                 halt
 
-main:           lea r0, helloWorld
-                sout r0
-                nl
-                ret
+main:           lea r0, helloWorld ; load string address
+                sout r0 ; print string
+                nl ; print newline
+                ret ; return back to main
 
 helloWorld:     .string "Hello, World!"
