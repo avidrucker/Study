@@ -387,7 +387,7 @@ main:           push lr
 ; passed tests so far: 199+9, 123+4, 123+345
 
 num32test1:     .word 4 ; first word holds the # of placecs
-                .word 4400 ; test1 ; next test: 1002 ; next test: 20000
+                .word 4409 ; test1 ; next test: 1002 ; next test: 20000
                 .word 34000 ; test1 ; next test: 1003 ; next test: 20000
 
 num32test2:     .word 6 ; first word holds the # of placecs
