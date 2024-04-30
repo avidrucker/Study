@@ -20,9 +20,10 @@ main:           push lr
                 lea r0, prompt1
                 sout r0
                 din r0
-                mov r1, 10 ; prevent seed from going out of bounds
-                rem r0, r1 ; by taking the remainder of the input
+                ld r1, rndNumCnt ; prevent seed from going out of bounds...
+                rem r0, r1 ; ...by taking the remainder of the input
                 ; note: this seed becomes the array pointer for the random number array
+                ; TODO: save random seed / array pointer onto the stack as a local var
 
                 ; prompt user for the number of sides on the dice
     @L2:        lea r1, prompt3
@@ -39,6 +40,7 @@ main:           push lr
                 brlt @L2
 
     @L3:        st r1, currentCap
+                ; TODO: save current cap onto the stack as a local var
 
     @L0:        lea r1, testNums2
                 add r1, r1, r0 ; offset the array pointer by the counter
@@ -65,7 +67,7 @@ main:           push lr
                 brne @L1
 
                 add r0, r0, 1 ; increment random number pointer to the next index
-                mov r1, 10 ; prevent pointer from going out of bounds
+                ld r1, rndNumCnt ; prevent pointer from going out of bounds
                 rem r0, r1 ; by taking the remainder of it divided by the array size
                 br @L0
 
@@ -74,7 +76,8 @@ main:           push lr
                 pop lr
                 ret
 
-currentCap:     .word 1
+rndNumCnt:        .word 10 ; this represents the size of the random number array
+currentCap:     .word 1 ; this represents the number of sides on the dice
 prompt1:        .string "Enter a random seed # from 0 to 99: "
 prompt2:        .string "Enter the number of dice to roll: "
 prompt3:        .string "Enter the number of die sides: " 
