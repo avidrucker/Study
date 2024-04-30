@@ -22,6 +22,23 @@ main:           push lr
                 din r0
                 mov r1, 10 ; prevent seed from going out of bounds
                 rem r0, r1 ; by taking the remainder of the input
+                ; note: this seed becomes the array pointer for the random number array
+
+                ; prompt user for the number of sides on the dice
+    @L2:        lea r1, prompt3
+                sout r1
+                din r1
+
+                ; if user enters 0 or a negative number, prompt them again
+                cmp r1, 0
+                brgt @L3
+                lea r2, invalFaceCnt
+                sout r2
+                nl
+                bre @L2
+                brlt @L2
+
+    @L3:        st r1, currentCap
 
     @L0:        lea r1, testNums2
                 add r1, r1, r0 ; offset the array pointer by the counter
@@ -30,7 +47,8 @@ main:           push lr
                 sout r2
 
                 ; try using rem to get random numbers under a given cap
-                mov r2, 4
+                ; mov r2, 4
+                ld r2, currentCap
                 rem r1, r2
 
                 ; add 1 to offset the 0-based array to get a 1-based num result
@@ -56,11 +74,13 @@ main:           push lr
                 pop lr
                 ret
 
+currentCap:     .word 1
 prompt1:        .string "Enter a random seed # from 0 to 99: "
 prompt2:        .string "Enter the number of dice to roll: "
 prompt3:        .string "Enter the number of die sides: " 
 youRolledA:     .string "You rolled a "
 againQ:         .string "Roll another? (1=yes, 0=no): "
+invalFaceCnt:   .string "Please enter a positive number"
 
 testNums:       .word 1
                 .word 2
@@ -69,7 +89,8 @@ testNums:       .word 1
                 .word 5
                 .word 6
 
-testNums2:      .word 1
+testNums2:      .word 0
+                .word 1
                 .word 2
                 .word 3
                 .word 4
@@ -78,7 +99,6 @@ testNums2:      .word 1
                 .word 7
                 .word 8
                 .word 9
-                .word 10
 
 nums:           .word 96
                 .word 16
