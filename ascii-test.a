@@ -1,0 +1,13 @@
+        mov r2, ' '
+        ld r1, asdf
+loop:   sub r0 r0 1
+        dout r0
+        aout r2
+        aout r0
+        nl
+        
+        cmp r0 r1
+        brne loop
+        halt
+
+asdf:   .word -250
