@@ -1,0 +1,232 @@
+; STATUS: incomplete
+; LCC Assembly program that enables the user to roll a 
+; chosen number of dice of a chosen number of sides
+; the program starts w/ an initial random seed input
+; DONE: prompt user for random seed
+; DONE: increment seed pointer to get next random number
+; DONE: make sure w/ rem (mod) that seed never goes out of bounds
+; TODO: functionize the random number generator seeding (takes a number, returns nothing)
+; TODO: functionize the random number generator (takes nothing, returns a number in r0)
+; TODO: functionize the dice rolling (takes number of dice, number of sides, returns total)
+
+startup:        bl main
+                halt
+
+; seeds the random number generator
+; returns the random seed in r0
+; pollutes r1
+seedRand:       lea r0, prompt1 ; prompt user for random seed
+                sout r0
+                din r0
+                ld r1, rndNumCnt ; prevent seed from going out of bounds...
+                rem r0, r1 ; ...by taking the remainder of the input
+                ; note: this seed becomes the array pointer for the random number array
+                ret
+
+; gets the number of faces on the dice
+; returns the number of faces in r0
+; pollutes r1
+getFaceCnt:     ; prompt user for the number of sides on the dice
+    @L2:        lea r0, prompt3
+                sout r0
+                din r0
+
+                ; if user enters 0 or a negative number, prompt them again
+                cmp r0, 0
+                brgt @L3
+                lea r1, invalFaceCnt
+                sout r1
+                nl
+                bre @L2
+                brlt @L2
+
+    @L3:        ; r0 now holds the number of sides on the dice
+                ret
+
+rndNumCnt:        .word 100 ; this represents the size of the random number array
+prompt1:        .string "Enter a random seed (0-99): "
+prompt2:        .string "Enter # of dice to roll: "
+prompt3:        .string "Enter # of die sides: " 
+youRolledA:     .string "You rolled a "
+againQ:         .string "Roll another? (1=yes, 0=no): "
+invalFaceCnt:   .string "Please enter positive #"
+offSetIsNow:    .string "Offset is now: "
+arrPtrIsNow:    .string "Array pointer is now pointing at: "
+
+main:           push lr
+                push fp
+                mov fp, sp
+
+                ; allocate space for the offset counter
+                ; counter is used to iterate through the random number array
+                ; it always starts at zero
+                sub sp, sp, 1 ; offset counter is now saved at fp-1
+
+                ; allocate space for the random number array pointer
+                bl seedRand ; seed the random number generator
+                ; DONE: save random seed / array pointer onto the stack as a local var
+                push r0 ; array pointer is now saved at fp-2
+
+                ; prompt user for the number of sides on the dice
+                bl getFaceCnt
+                ; DONE: save current cap onto the stack as a local var
+                ; face count represents the number of sides on the dice
+                push r0 ; face count is now saved at fp-3
+
+    @L0:        lea r1, rndNumsArr ; we start by loading the address of the nums array
+                ldr r0, fp, -2 ; load the array pointer from the stack
+                add r1, r1, r0 ; add the array pointer to the array address
+                ldr r1, r1, 0 ; deref the array pointer to get a value from the array
+                
+                lea r0, youRolledA
+                sout r0
+
+                ; mod to get random number under the number of sides
+                ldr r0, fp, -3 ; load the number of sides on the dice
+                rem r1, r0
+                ; add 1 to offset the 0-based array to get a 1-based num result
+                add r1, r1, 1
+                dout r1
+                nl
+
+                ; query the user do they want another die roll
+                lea r0, againQ
+                sout r0
+                din r1
+                cmp r1, 1
+                brne @L1
+
+                ldr r0, fp, -1 ; load the offset counter from the stack
+                add r0, r0, 1 ; increment offset counter
+                str r0, fp, -1 ; save the new offset counter back onto the stack
+                ; add offset counter to the array pointer to get the new array pointer
+                ldr r1, fp, -2 ; load the array pointer from the stack
+                add r1, r1, r0 ; add the offset counter to the array pointer
+                ld r0, rndNumCnt ; prevent array pointer from going out of bounds
+                rem r1, r0 ; by taking the remainder of it divided by the array size
+
+                lea r1, rndNumsArr ; load the array address
+                ldr r0, fp, -2 ; load the array pointer from the stack
+                add r1, r1, r0 ; add the array pointer to the array address
+                str r1, fp, -2 ; save the new array pointer back onto the stack
+
+                lea r0, offSetIsNow
+                sout r0
+                ldr r0, fp, -1
+                dout r0
+                nl
+
+                lea r0, arrPtrIsNow
+                sout r0
+                ldr r0, fp, -2
+                ; ldr r0, r0, 0
+                dout r0
+                nl
+
+                br @L0
+
+    @L1:        mov sp, fp
+                pop fp
+                pop lr
+                ret
+
+rndNumsArr:     .word 96
+                .word 16
+                .word 83
+                .word 58
+                .word 81
+                .word 24
+                .word 88
+                .word 85
+                .word 66
+                .word 15
+                .word 31
+                .word 7
+                .word 29
+                .word 19
+                .word 97
+                .word 52
+                .word 75
+                .word 47
+                .word 62
+                .word 89
+                .word 3
+                .word 5
+                .word 13
+                .word 11
+                .word 73
+                .word 44
+                .word 14
+                .word 57
+                .word 9
+                .word 30
+                .word 77
+                .word 35
+                .word 4
+                .word 74
+                .word 23
+                .word 28
+                .word 72
+                .word 86
+                .word 70
+                .word 6
+                .word 22
+                .word 51
+                .word 94
+                .word 32
+                .word 48
+                .word 39
+                .word 54
+                .word 76
+                .word 63
+                .word 34
+                .word 71
+                .word 33
+                .word 2
+                .word 1
+                .word 60
+                .word 55
+                .word 53
+                .word 0 ; this can be 100 or 0 depending on the indexing
+                .word 82
+                .word 42
+                .word 37
+                .word 68
+                .word 91
+                .word 26
+                .word 40
+                .word 78
+                .word 20
+                .word 27
+                .word 95
+                .word 17
+                .word 69
+                .word 43
+                .word 61
+                .word 25
+                .word 67
+                .word 99
+                .word 79
+                .word 98
+                .word 41
+                .word 36
+                .word 92
+                .word 18
+                .word 64
+                .word 90
+                .word 38
+                .word 10
+                .word 21
+                .word 80
+                .word 84
+                .word 65
+                .word 8
+                .word 12
+                .word 56
+                .word 93
+                .word 87
+                .word 49
+                .word 46
+                .word 59
+                .word 50
+                .word 45
