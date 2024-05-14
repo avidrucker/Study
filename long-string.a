@@ -1,0 +1,9 @@
+startup:    bl main
+            halt 
+
+main:       lea r0, x
+            sout r0
+            nl
+            ret
+
+x: .string "I am a very long string that goes on and on, it goes on and on my friends. It was the song that never ends. It just goes on and on my friends. Some people started singing it not knowing what it was, and they'll continue singing it forever just because... It is the song that never ends."
