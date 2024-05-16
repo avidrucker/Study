@@ -1,0 +1,16 @@
+        mov r0, 'a'
+        ; mov r1, 'a'
+        cmp r0, r1
+        ; cmp r0, 'a' ; imm5 out of range
+        bre @L0
+        lea r0, notEq
+        sout r0
+        nl
+        br @L1
+@L0:    lea r0, eq
+        sout r0
+        nl
+@L1:    halt
+
+notEq:  .string "not equal"
+eq:     .string "equal"
