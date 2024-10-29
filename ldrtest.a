@@ -1,0 +1,8 @@
+        ld r0, x
+        ; ldr r1, r0, 1
+        ld r1, x+1
+        dout r0
+        dout r1
+        halt
+x:      .word 5
+y:      .word 21
